@@ -23,7 +23,7 @@ sys_exit(void)
 int
 sys_wait(void)
 {
-  return wait(NULL);
+  return wait(0);
 }
 
 int
