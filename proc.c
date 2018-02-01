@@ -333,7 +333,6 @@ waitpid(int pid, int* status, int options) {
         procvalid = 1;
         // Found it
         if (p->state == ZOMBIE) {
-          if (status != 0) *status = p->exitstatus;
           kfree(p->kstack);
           p->kstack = 0;
           freevm(p->pgdir);
@@ -343,6 +342,7 @@ waitpid(int pid, int* status, int options) {
           p->killed = 0;
           p->state = UNUSED;
           release(&ptable.lock);
+          if (status != 0) *status = p->exitstatus;
           return pid;
         }
         break;
