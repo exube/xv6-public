@@ -19,7 +19,7 @@ sys_exit(void)
   int exitstat;
 
   if (argint(0, &exitstat) < 0) {
-    return -1;
+    exit(0);
   }
   exit(exitstat);
   return 0;  // not reached
