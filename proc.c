@@ -89,6 +89,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority = 0;
 
   release(&ptable.lock);
 
@@ -150,6 +151,7 @@ userinit(void)
   acquire(&ptable.lock);
 
   p->state = RUNNABLE;
+  p->priority = 10;
 
   release(&ptable.lock);
 }
@@ -195,10 +197,12 @@ fork(void)
     kfree(np->kstack);
     np->kstack = 0;
     np->state = UNUSED;
+    np->priority = 10;
     return -1;
   }
   np->sz = curproc->sz;
   np->parent = curproc;
+  np->priority = curproc->priority;
   *np->tf = *curproc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
@@ -244,6 +248,7 @@ exit(int status)
   }
 
   curproc->exitstatus = status;
+  curproc->priority = 10;
 
   begin_op();
   iput(curproc->cwd);
@@ -299,6 +304,7 @@ wait(int* status)
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
+        p->priority = 10;
         release(&ptable.lock);
         return pid;
       }
@@ -340,6 +346,7 @@ waitpid(int pid, int* status, int options) {
           p->parent = 0;
           p->name[0] = 0;
           p->killed = 0;
+          p->priority = 10;
           p->state = UNUSED;
           if (status != 0) *status = p->exitstatus;
           release(&ptable.lock);
@@ -361,6 +368,71 @@ waitpid(int pid, int* status, int options) {
 
 }
 
+// Set priority of a process
+// set pid=-1 to get your own priority
+// Returns old priority on success
+// Return -1 on failure when e.g. pri !: [0:32)
+int
+setpri(int pri) {
+//  int pid = -1;
+ // if (pri < 0 && pri > 31) return -1;
+ // struct proc *p;
+  struct proc *curproc = myproc();
+//  int procvalid = 0;
+ // int oldpri;
+ 
+ acquire(&ptable.lock);
+//  if (pid == -1) {
+  //  p = curproc;
+ //   procvalid = 1;
+ // } else {
+  //  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+   //   if (p->pid == pid) { // found it
+     //   procvalid = 1;
+      //  break;
+     // }
+   // }
+ // }
+ // if (procvalid) {
+  //  oldpri = p->priority;
+   // p->priority = pri;
+ // } else {
+  //  oldpri = -1; 
+ // }
+  curproc->priority=pri;
+  curproc->state=RUNNABLE;
+ 
+  release(&ptable.lock);
+  yield();
+  return pri;
+}
+
+int
+getpri(int pid) {
+  struct proc *p;
+  struct proc *curproc = myproc();
+  int procvalid = 0;
+  int pri;
+  acquire(&ptable.lock);
+  if (pid == -1) {
+    p = curproc;
+    procvalid = 1;
+  } else {
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->pid == pid) { // found it
+        procvalid = 1;
+        break;
+      }
+    }
+  }
+
+
+  if (!procvalid) pri = -1;
+  else pri = p->priority;
+  release(&ptable.lock);
+  return pri;
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -376,7 +448,7 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
   int bestpri;
-  struct proc *bestp;
+  struct proc *bestp = 0;
   for(;;){
     bestpri = 32;
     // Enable interrupts on this processor.
@@ -394,9 +466,14 @@ scheduler(void)
       }
     }
 
-    if (bestpri == 32) panic("priority not initialized");
+    if (bestpri == 32) {
+      //panic("priority not initialized");
+      bestpri = 0;
+    }
 
     p = bestp;
+
+    p->priority = bestpri;
 
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it

@@ -102,6 +102,27 @@ sys_sleep(void)
   return 0;
 }
 
+int
+sys_setpri(void)
+{
+  int pri;
+
+  //if (argint(0, &pid) < 0)
+  //  return -1;
+  if (argint(0, &pri) < 0)
+    return -1;
+
+  return setpri(pri);
+}
+
+int
+sys_getpri(void)
+{
+  int pid;
+  if (argint(0, &pid) < 0)
+    pid = -1;
+  return getpri(pid);
+}
 // return how many clock tick interrupts have occurred
 // since start.
 int

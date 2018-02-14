@@ -24,7 +24,8 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int waitpid(int, int*, int);
-
+int setpri(int);
+int getpri(int);
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);
