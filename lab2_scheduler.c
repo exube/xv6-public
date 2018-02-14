@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     setpri(0);
     for (i = 0; i <  3; i++) {
 	pid = fork();
+        uint startticks = uptime();
 	if (pid > 0 ) {
 		continue;}
 	else if ( pid == 0) {
@@ -37,7 +38,7 @@ int main(int argc, char *argv[])
 		for (j=0;j<50000;j++) {
 			for(k=0;k<10000;k++) {
 				asm("nop"); }}
-		printf(1, "\n child# %d with priority %d has finished! \n",getpid(),30-10*i);		
+		printf(1, "\n child# %d with priority %d has finished after executing %d ticks and running %d ticks! \n",getpid(),30-10*i, getticks(), uptime() - startticks);		
 		exit(0);
         }
         else {

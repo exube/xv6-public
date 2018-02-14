@@ -198,11 +198,13 @@ fork(void)
     np->kstack = 0;
     np->state = UNUSED;
     np->priority = 10;
+    np->run_time = 0;
     return -1;
   }
   np->sz = curproc->sz;
   np->parent = curproc;
   np->priority = curproc->priority;
+  np->run_time = curproc->run_time;
   *np->tf = *curproc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
@@ -433,6 +435,11 @@ getpri(int pid) {
   return pri;
 }
 
+uint
+getticks(void) {
+  return myproc()->run_time;
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -457,6 +464,8 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == SLEEPING && p->priority >= 0) 
+        p->priority--;
       if(p->state != RUNNABLE)
         continue;
       
@@ -466,18 +475,21 @@ scheduler(void)
       }
     }
 
-    if (bestpri == 32) {
-      //panic("priority not initialized");
-      bestpri = 0;
+    if (bestpri >= 32) {
+      bestpri = 31;
     }
 
     p = bestp;
 
     p->priority = bestpri;
+    if (p->priority < 31) p->priority++;
 
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it
     // before jumping back to us.
+
+    // Debug purpose
+    uint run_time = ticks;
     c->proc = p;
     switchuvm(p);
     p->state = RUNNING;
@@ -487,6 +499,7 @@ scheduler(void)
 
     // Process is done running for now.
     // It should have changed its p->state before coming back.
+    p->run_time += ticks - run_time;
     c->proc = 0;
     release(&ptable.lock);
 

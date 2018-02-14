@@ -175,7 +175,8 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_lab1\
-	_lab2_scheduler
+	_lab2_scheduler\
+	_lab2_aging
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -245,7 +246,7 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c umalloc.c lab1.c lab2_scheduler.c\
+	printf.c umalloc.c lab1.c lab2_scheduler.c lab2_aging.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 

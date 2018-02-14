@@ -124,6 +124,7 @@ void            yield(void);
 
 int             setpri(int);
 int             getpri(int);
+uint		getticks(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

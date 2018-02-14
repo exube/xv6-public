@@ -123,6 +123,13 @@ sys_getpri(void)
     pid = -1;
   return getpri(pid);
 }
+
+int
+sys_getticks(void) 
+{
+  return getticks();
+}
+
 // return how many clock tick interrupts have occurred
 // since start.
 int

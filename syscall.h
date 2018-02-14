@@ -23,3 +23,4 @@
 #define SYS_waitpid 22
 #define SYS_setpri  23
 #define SYS_getpri  24
+#define SYS_getticks 25

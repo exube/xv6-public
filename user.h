@@ -26,6 +26,7 @@ int uptime(void);
 int waitpid(int, int*, int);
 int setpri(int);
 int getpri(int);
+uint getticks(void);
 // ulib.c
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);
