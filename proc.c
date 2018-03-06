@@ -193,7 +193,7 @@ fork(void)
   }
 
   // Copy process state from proc.
-  if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
+  if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz, curproc->st)) == 0){
     kfree(np->kstack);
     np->kstack = 0;
     np->state = UNUSED;
@@ -202,6 +202,7 @@ fork(void)
     return -1;
   }
   np->sz = curproc->sz;
+  np->st = curproc->st;
   np->parent = curproc;
   np->priority = curproc->priority;
   np->run_time = curproc->run_time;
