@@ -310,6 +310,29 @@ clearpteu(pde_t *pgdir, char *uva)
   *pte &= ~PTE_U;
 }
 
+// Given an invalid virtual address, allocate a 
+// page containing this address.
+// Returns the end of this new page.
+uint allocvp(pde_t *pgdir, uint addr) {
+  char *mem;
+  addr = PGROUNDDOWN(addr);
+  mem = kalloc();
+  if (mem == 0) {
+    cprintf("allocvp out of memory\n");
+    return 0;
+  }
+  memset(mem, 0, PGSIZE);
+  if (mappages(pgdir, (char*)addr, PGSIZE, V2P(mem), PTE_W|PTE_U) < 0) {
+    cprintf("allocvp out of memory (2)\n");
+    kfree(mem);
+    return 0;
+  }
+
+  return addr;
+  
+
+}
+
 // Given a parent process's page table, create a copy
 // of it for a child.
 pde_t*
