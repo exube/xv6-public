@@ -3,7 +3,7 @@
 void of(int);
 int main(void) {
   printf(1, "hi\n");
-//  of(1);
+  of(1);
   exit(0);
 }
 

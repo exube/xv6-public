@@ -338,7 +338,7 @@ copyuvm(pde_t *pgdir, uint sz, uint ssz)
       goto bad;
   }
   
-  curpage = STACKTOP - 4;
+  curpage = STACKTOP - PGSIZE;
   for(i = 0; i < ssz; i++) {
     if ((pte = walkpgdir(pgdir, (void*) (curpage - i*PGSIZE), 0)) == 0)
       panic("copyuvm: pte should exist");
