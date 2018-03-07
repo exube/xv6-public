@@ -47,6 +47,23 @@ trap(struct trapframe *tf)
   }
 
   switch(tf->trapno){
+  // Handle defined traps here
+  case T_PGFLT:
+    // kernel is not allowed to overflow stack
+    if(myproc() == 0 || (tf->cs&3) == 0) {
+      cprintf("Page fault from cpu %d eip %x (cr2=0x%x)\n",
+        cpuid(), tf->eip, rcr2());
+      panic("trap");
+    }
+    // check if pgflt address is right below current stack
+    if ((STACKTOP - (myproc()->st) * PGSIZE) - rcr2() < PGSIZE) cprintf("DEBUG: Stack overflow\n");
+    cprintf("pid %d %s: Page fault err %d on cpu %d "
+            "eip 0x%x addr 0x%x -- killed -- It doesn't have to end this way!\n", 
+            myproc()->pid, myproc()->name, tf->err, cpuid(), tf->eip, rcr2());
+            myproc()->killed = 1;
+    break;
+
+
   case T_IRQ0 + IRQ_TIMER:
     if(cpuid() == 0){
       acquire(&tickslock);
