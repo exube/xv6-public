@@ -57,11 +57,12 @@ trap(struct trapframe *tf)
     }
     // check if pgflt address is right below current stack
     if ((STACKTOP - (myproc()->st) * PGSIZE) - rcr2() < PGSIZE) {
-      cprintf("DEBUG: Stack overflow\n");
-      cprintf("pid %d %s: Page fault err %d on cpu %d "
-            "eip 0x%x addr 0x%x\n", 
-            myproc()->pid, myproc()->name, tf->err, cpuid(), tf->eip, rcr2());
+      //cprintf("DEBUG: Stack overflow\n");
+      //cprintf("pid %d %s: Page fault err %d on cpu %d "
+      //      "eip 0x%x addr 0x%x\n", 
+      //      myproc()->pid, myproc()->name, tf->err, cpuid(), tf->eip, rcr2());
       allocvp(myproc()->pgdir, rcr2());
+      myproc()->st++;
     } else {
       cprintf("pid %d %s: Page fault err %d on cpu %d "
             "eip 0x%x addr 0x%x -- killed\n", 
